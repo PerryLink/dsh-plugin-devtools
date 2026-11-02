@@ -1,0 +1,44 @@
+{
+  "name": "dsh-plugin-ready",
+  "version": "0.1.0",
+  "description": "Static preflight for DeepSeek Harness plugin packages.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "dsh-ready": "./bin/dsh-ready.js"
+  },
+  "exports": {
+    ".": "./src/ready.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PerryLink/dsh-plugin-devtools.git",
+    "directory": "packages/ready"
+  },
+  "homepage": "https://github.com/PerryLink/dsh-plugin-devtools/tree/main/packages/ready",
+  "bugs": {
+    "url": "https://github.com/PerryLink/dsh-plugin-devtools/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "preflight",
+    "check"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

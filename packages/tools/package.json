@@ -1,0 +1,44 @@
+{
+  "name": "dsh-plugin-tools",
+  "version": "0.1.0",
+  "description": "List, diagnose, and install the DeepSeek Harness plugin developer tools.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "dsh-tools": "./bin/dsh-tools.js"
+  },
+  "exports": {
+    ".": "./src/tools.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PerryLink/dsh-plugin-devtools.git",
+    "directory": "packages/tools"
+  },
+  "homepage": "https://github.com/PerryLink/dsh-plugin-devtools/tree/main/packages/tools",
+  "bugs": {
+    "url": "https://github.com/PerryLink/dsh-plugin-devtools/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "toolchain",
+    "tools"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

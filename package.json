@@ -1,0 +1,17 @@
+{
+  "name": "dsh-plugin-devtools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The dsh-plugin-start / dsh-plugin-ready / dsh-plugin-tools / dsh-plugin-dev family.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test packages/*/test/*.test.js"
+  }
+}

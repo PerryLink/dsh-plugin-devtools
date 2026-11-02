@@ -1,0 +1,44 @@
+{
+  "name": "dsh-plugin-start",
+  "version": "0.1.0",
+  "description": "Create a minimal, correct DeepSeek Harness plugin skeleton.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "dsh-start": "./bin/dsh-start.js"
+  },
+  "exports": {
+    ".": "./src/start.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PerryLink/dsh-plugin-devtools.git",
+    "directory": "packages/start"
+  },
+  "homepage": "https://github.com/PerryLink/dsh-plugin-devtools/tree/main/packages/start",
+  "bugs": {
+    "url": "https://github.com/PerryLink/dsh-plugin-devtools/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "scaffold",
+    "starter"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
