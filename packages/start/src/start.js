@@ -53,7 +53,7 @@ function pkgJson(name, client) {
     main: './index.js',
     exports: { '.': './index.js' },
     files: ['index.js', 'cordis.patch.yml', 'README.md', 'LICENSE'],
-    engines: { node: '>=20', dsh: '>=0.2.2-alpha.2 <0.3.0' },
+    engines: { node: '>=20', dsh: '>=0.2.0 <0.3.0' },
     dsh: {
       manifestVersion: 1,
       bundle: { patch: './cordis.patch.yml' },

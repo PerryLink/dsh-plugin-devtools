@@ -21,7 +21,7 @@ test('new delegates to start', () => {
   assert.ok(fs.existsSync(path.join(target, 'package.json')))
 })
 
-test('submit without --standards is not-run (3)', () => {
-  const out = spawnSync(process.execPath, [BIN, 'submit', '.'], { encoding: 'utf8' })
-  assert.equal(out.status, 3)
+test('submit on a non-plugin fails the compat subset', () => {
+  const out = spawnSync(process.execPath, [BIN, 'submit', '.', '--json'], { encoding: 'utf8' })
+  assert.equal(out.status, 2)
 })

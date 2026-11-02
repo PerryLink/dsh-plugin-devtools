@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { spawnSync } from 'node:child_process'
+import test from 'node:test'
+
+const BIN = new URL('../bin/dsh-dev.js', import.meta.url).pathname
+
+function fixture() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-dev-submit-'))
+  fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
+    name: 'demo-submit', version: '0.1.0', description: 'x', license: 'Apache-2.0', type: 'module',
+    main: './index.js', exports: { '.': './index.js' },
+    engines: { node: '>=20', dsh: '>=0.2.2-alpha.2 <0.3.0' },
+    dsh: { manifestVersion: 1, bundle: { patch: './cordis.patch.yml' } },
+  }, null, 2))
+  fs.writeFileSync(path.join(dir, 'index.js'), 'export default {}\n')
+  fs.writeFileSync(path.join(dir, 'cordis.patch.yml'), '- insert: []\n')
+  fs.writeFileSync(path.join(dir, 'README.md'), '# demo\n')
+  fs.writeFileSync(path.join(dir, 'LICENSE'), 'Apache-2.0\n')
+  return dir
+}
+
+test('submit without standards runs the compat subset and is incomplete without C1/C3', () => {
+  const dir = fixture()
+  const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--json'], { encoding: 'utf8' })
+  assert.equal(out.status, 3, out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.equal(json.mode, 'compat')
+  assert.equal(json.status, 'incomplete')
+  assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-run')
+})
+
+test('submit delegates to a discovered entry-validate script', () => {
+  const dir = fixture()
+  const standards = fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-standards-'))
+  const script = path.join(standards, '40-checker', 'scripts')
+  fs.mkdirSync(script, { recursive: true })
+  fs.writeFileSync(path.join(script, 'entry-validate.mjs'), 'process.exit(0)\n')
+  const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--standards', standards], { encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+})

@@ -15,12 +15,15 @@ It is a thin dispatcher:
 | `dsh-dev new` / `start` | `dsh-plugin-start` |
 | `dsh-dev check` / `ready` | `dsh-plugin-ready` |
 | `dsh-dev tools` | `dsh-plugin-tools` |
-| `dsh-dev test` | guidance for `dsh-test-drive` (not bundled) |
-| `dsh-dev submit` | `entry-validate` in a dsh-standards checkout, with `--standards` |
+| `dsh-dev test` | isolated temp `DSH_HOME`: add → dump-config → remove |
+| `dsh-dev submit` | detected `entry-validate` checkout, or a built-in compat subset |
 | `dsh-dev upgrade` | guidance for `dsh-plugin-upgrade` (not bundled) |
 
-No host install, no score, no ranking, no certification; `test`/`submit` return
-`3` (not-run) until a real underlying tool is supplied.
+`test` uses `dsh plugin add` + `dsh --dump-config` + `dsh plugin remove` in a
+temporary `DSH_HOME`; it is install/dump/remove, not a full UI/boot test.
+`submit` auto-detects a `dsh-standards` checkout, or runs a compat subset with
+C1/C3 `not-run` until `--meta`/`--host-evidence` are supplied. No score, ranking,
+or certification.
 
 ## Why `dsh-dev`
 

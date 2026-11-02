@@ -1,9 +1,10 @@
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
-import path from 'node:path'
 import { main as startMain } from 'dsh-plugin-start'
 import { main as readyMain } from 'dsh-plugin-ready'
 import { main as toolsMain } from 'dsh-plugin-tools'
+import { testDrive } from './host-test.js'
+import { submit } from './submit.js'
 
 const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
 
@@ -38,36 +39,36 @@ export async function main(argv) {
   if (command === 'check' || command === 'ready') return readyMain(rest)
   if (command === 'tools') return toolsMain(rest)
   if (command === 'test') {
-    console.error('dsh-dev test: host install is not bundled in this package.')
-    console.error('Install dsh-test-drive, then run its isolated install/smoke flow and feed the result to:')
-    console.error('  dsh-dev submit <dir> --standards <dsh-standards-checkout> --host-evidence <host.json>')
-    return 3
+    let dir = null
+    let json = false
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--json') json = true
+      else if (!dir && !rest[i].startsWith('-')) dir = rest[i]
+    }
+    const result = testDrive(dir || '.')
+    if (json) process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+    else {
+      console.log(`dsh-dev test: ${result.status}`)
+      console.log(result.reason ?? `target: ${result.target}`)
+      for (const c of result.commands ?? []) console.log(`  ${c.exit === 0 ? 'PASS' : 'FAIL'} ${c.command}`)
+      console.log('not claimed: full UI/boot, C3 certification, security audit')
+    }
+    return result.status === 'fail' ? 2 : result.status === 'blocked' ? 3 : 0
   }
   if (command === 'submit') {
     let dir = null
     let standards = null
+    let meta = null
+    let host = null
+    let json = false
     for (let i = 0; i < rest.length; i++) {
       if (rest[i] === '--standards') { standards = rest[++i] ?? null; continue }
+      if (rest[i] === '--meta') { meta = rest[++i] ?? null; continue }
+      if (rest[i] === '--host-evidence') { host = rest[++i] ?? null; continue }
+      if (rest[i] === '--json') { json = true; continue }
       if (!dir && !rest[i].startsWith('-')) dir = rest[i]
     }
-    if (!standards) {
-      console.error('dsh-dev submit: pass --standards <checkout> to run entry-validate.')
-      console.error('Otherwise run: entry-validate <dir> --meta <meta.json> --host-evidence <host.json>')
-      return 3
-    }
-    const script = path.join(standards, '40-checker', 'scripts', 'entry-validate.mjs')
-    if (!fs.existsSync(script)) {
-      console.error(`entry-validate not found: ${script}`)
-      return 1
-    }
-    const args = [script]
-    if (dir) args.push(dir)
-    for (let i = 0; i < rest.length; i++) {
-      if (rest[i] === '--standards') { i++; continue }
-      args.push(rest[i])
-    }
-    const run = spawnSync(process.execPath, args, { stdio: 'inherit' })
-    return run.status ?? 1
+    return submit({ dir, standards, meta, hostEvidence: host, json })
   }
   if (command === 'upgrade') {
     console.error('dsh-dev upgrade: install dsh-plugin-upgrade, then run:')

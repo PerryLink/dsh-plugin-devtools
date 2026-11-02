@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-dev",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "One command for the DeepSeek Harness plugin developer workflow.",
   "license": "Apache-2.0",
   "type": "module",
@@ -20,18 +20,17 @@
     "node": ">=20"
   },
   "dependencies": {
-    "dsh-plugin-ready": "0.1.3",
-    "dsh-plugin-start": "0.1.3",
-    "dsh-plugin-tools": "0.1.3"
+    "dsh-plugin-ready": "0.2.0",
+    "dsh-plugin-start": "0.2.0",
+    "dsh-plugin-tools": "0.2.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PerryLink/dsh-plugin-devtools.git",
-    "directory": "packages/dev"
+    "url": "git+https://github.com/PerryLink/dsh-plugin-dev.git"
   },
-  "homepage": "https://github.com/PerryLink/dsh-plugin-devtools/tree/main/packages/dev",
+  "homepage": "https://github.com/PerryLink/dsh-plugin-dev",
   "bugs": {
-    "url": "https://github.com/PerryLink/dsh-plugin-devtools/issues"
+    "url": "https://github.com/PerryLink/dsh-plugin-dev/issues"
   },
   "keywords": [
     "dsh",

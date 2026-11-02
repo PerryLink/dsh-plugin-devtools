@@ -1,3 +1,10 @@
+> **Index / archive.** Active development has moved to four repos:
+> [start](https://github.com/PerryLink/dsh-plugin-start) ·
+> [ready](https://github.com/PerryLink/dsh-plugin-ready) ·
+> [tools](https://github.com/PerryLink/dsh-plugin-tools) ·
+> [dev](https://github.com/PerryLink/dsh-plugin-dev).
+> This repo keeps the history, design, and the four-package archive.
+
 # dsh-plugin-devtools
 
 Four small CLIs for the DeepSeek Harness plugin developer journey. One command

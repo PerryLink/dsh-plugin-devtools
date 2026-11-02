@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { spawnSync } from 'node:child_process'
 
 const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
 const SEMVER = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/
@@ -8,12 +9,13 @@ export function usage() {
   return `dsh-ready ${VERSION} — static preflight for a DSH plugin package
 
 Usage:
-  dsh-ready [<dir>] [--json] [--out <file>] [--strict]
+  dsh-ready [<dir>] [--json] [--out <file>] [--strict] [--host]
 
 Options:
   --json        machine-readable report
   --out <file>  write the JSON report to a file
   --strict      treat warnings as failures
+  --host        also run dsh-clinic X (host contract; not C3)
   -h, --help    show this help
   -v, --version show the version
 
@@ -25,12 +27,13 @@ and be fed to entry-validate --host-evidence.
 }
 
 export function parse(argv) {
-  const out = { dir: null, json: false, out: null, strict: false, help: false, version: false }
+  const out = { dir: null, json: false, out: null, strict: false, host: false, help: false, version: false }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--json') out.json = true
     else if (arg === '--out') out.out = argv[++i]
     else if (arg === '--strict') out.strict = true
+    else if (arg === '--host') out.host = true
     else if (arg === '--help' || arg === '-h') out.help = true
     else if (arg === '--version' || arg === '-v') out.version = true
     else if (arg.startsWith('-')) throw new Error(`unknown option: ${arg}`)
@@ -164,6 +167,23 @@ function report(target, checks, pkg) {
   }
 }
 
+export function runHost(dir) {
+  const which = process.platform === 'win32' ? 'where' : 'which'
+  const probe = spawnSync(which, ['dsh-clinic'], { encoding: 'utf8', timeout: 3000 })
+  if (probe.status !== 0) {
+    return { status: 'blocked', reason: 'dsh-clinic is not installed; npm i -g dsh-clinic', command: null, groups: null }
+  }
+  const command = ['dsh-clinic', '--repo', dir, '--no-smoke', '--only', 'X', '--json', '-']
+  const run = spawnSync(command[0], command.slice(1), { encoding: 'utf8', timeout: 60_000 })
+  let json = null
+  try { json = JSON.parse(run.stdout) } catch {}
+  const groups = json?.groups?.X ?? null
+  if (!json) return { status: 'blocked', reason: `dsh-clinic produced no JSON (exit ${run.status})`, command: command.join(' '), groups: null }
+  if (groups?.fail > 0) return { status: 'fail', reason: 'dsh-clinic X reported fail', command: command.join(' '), groups }
+  if (!groups || groups.ran === 0 || groups.skipped > 0) return { status: 'blocked', reason: 'dsh-clinic X did not run all checks', command: command.join(' '), groups }
+  return { status: 'pass', reason: 'dsh-clinic X passed', command: command.join(' '), groups }
+}
+
 export async function main(argv) {
   let args
   try {
@@ -182,7 +202,10 @@ export async function main(argv) {
     return 0
   }
   const result = check(args.dir || '.')
-  const exit = result.static.failed > 0 || (args.strict && result.static.warnings > 0) ? 2 : 0
+  if (args.host) result.host = runHost(result.target)
+  let exit = result.static.failed > 0 || (args.strict && result.static.warnings > 0) ? 2 : 0
+  if (args.host && result.host.status === 'fail') exit = 2
+  if (args.host && result.host.status === 'blocked' && exit === 0) exit = 3
   if (args.json) {
     const text = JSON.stringify(result, null, 2) + '\n'
     if (args.out) fs.writeFileSync(path.resolve(args.out), text)
@@ -192,7 +215,8 @@ export async function main(argv) {
     console.log(`target: ${result.target}`)
     for (const c of result.static.checks) console.log(`${c.id} ${c.status.toUpperCase()} ${c.detail}`)
     console.log(`\nstatic: ${result.static.status} (${result.static.passed} pass, ${result.static.warnings} warn, ${result.static.failed} fail)`)
-    console.log('host: not-run (use test-drive for a real host install)')
+    console.log(`host: ${result.host.status}${result.host.reason ? ` (${result.host.reason})` : ''}`)
+    console.log('host X is a contract check, not C3; use test-drive for a real install')
     console.log('not claimed: host install / security audit / performance / certification')
     if (args.out) fs.writeFileSync(path.resolve(args.out), JSON.stringify(result, null, 2) + '\n')
   }
