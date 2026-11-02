@@ -1,11 +1,11 @@
 {
   "name": "dsh-plugin-ready",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Static preflight for DeepSeek Harness plugin packages.",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {
-    "dsh-ready": "./bin/dsh-ready.js"
+    "dsh-ready": "bin/dsh-ready.js"
   },
   "exports": {
     ".": "./src/ready.js"

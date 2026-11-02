@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const NAME_RE = /^[a-z0-9][a-z0-9-]*$/
-const VERSION = '0.1.0'
+const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
 
 export function usage() {
   return `dsh-start ${VERSION} — create a minimal DeepSeek Harness plugin

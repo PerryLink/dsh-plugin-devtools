@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
 
-const VERSION = '0.1.0'
+const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
 
 export const KNOWN = [
   { id: 'start', pkg: 'dsh-plugin-start', bin: 'dsh-start', role: 'scaffold a plugin' },

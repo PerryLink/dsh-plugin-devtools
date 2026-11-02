@@ -5,7 +5,7 @@ import { main as startMain } from 'dsh-plugin-start'
 import { main as readyMain } from 'dsh-plugin-ready'
 import { main as toolsMain } from 'dsh-plugin-tools'
 
-const VERSION = '0.1.0'
+const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
 
 export function usage() {
   return `dsh-dev ${VERSION} — one command for the DSH plugin developer workflow

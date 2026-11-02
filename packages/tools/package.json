@@ -1,11 +1,11 @@
 {
   "name": "dsh-plugin-tools",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "List, diagnose, and install the DeepSeek Harness plugin developer tools.",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {
-    "dsh-tools": "./bin/dsh-tools.js"
+    "dsh-tools": "bin/dsh-tools.js"
   },
   "exports": {
     ".": "./src/tools.js"
