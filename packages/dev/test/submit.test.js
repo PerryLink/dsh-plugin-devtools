@@ -22,13 +22,13 @@ function fixture() {
   return dir
 }
 
-test('submit without standards runs the compat subset and is incomplete without C1/C3', () => {
+test('submit without standards runs the vendored full checker and is incomplete without C1/C7', () => {
   const dir = fixture()
   const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--json'], { encoding: 'utf8' })
   assert.equal(out.status, 3, out.stderr)
   const json = JSON.parse(out.stdout)
-  assert.equal(json.mode, 'compat')
-  assert.equal(json.status, 'incomplete')
+  assert.equal(json.schema, 'dsh-entry-audit/1')
+  assert.equal(json.conclusion.status, 'incomplete')
   assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-applicable')
 })
 
@@ -42,14 +42,14 @@ test('submit delegates to a discovered entry-validate script', () => {
   assert.equal(out.status, 0, out.stderr)
 })
 
-test('submit with meta but no host evidence passes the ENTRY compat subset', () => {
+test('submit with meta but no host evidence passes the ENTRY full checker', () => {
   const dir = fixture()
   const meta = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-meta-')), 'meta.json')
   fs.writeFileSync(meta, JSON.stringify({ repo: 'PerryLink/demo-submit', topics: ['dsh-plugin'], archived: false, commit: 'abc123', pushedAt: '2026-11-02' }))
   const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--meta', meta, '--json'], { encoding: 'utf8' })
   assert.equal(out.status, 0, out.stderr)
   const json = JSON.parse(out.stdout)
-  assert.equal(json.status, 'pass-with-warnings')
+  assert.equal(json.conclusion.status, 'pass-with-warnings')
   assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-applicable')
   assert.deepEqual(json.checks.filter(c => c.status === 'fail'), [])
 })

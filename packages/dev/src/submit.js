@@ -1,7 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { check as readyCheck } from 'dsh-plugin-ready'
+
+const VENDOR = fileURLToPath(new URL('./vendor/entry-validate.mjs', import.meta.url))
 
 function readJson(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')) } catch { return null }
@@ -85,13 +88,14 @@ function compat(dir, meta, hostEvidence) {
 
 export function submit({ dir, standards, meta: metaFile, hostEvidence: hostFile, json }) {
   const target = path.resolve(dir || '.')
-  const script = findStandards(standards)
-  if (script) {
+  const script = findStandards(standards) ?? VENDOR
+  if (fs.existsSync(script)) {
     const args = [script, target]
     const meta = metaFile ? path.resolve(metaFile) : null
     const host = hostFile ? path.resolve(hostFile) : null
     if (meta) args.push('--meta', meta)
     if (host) args.push('--host-evidence', host)
+    if (json) args.push('--format', 'json')
     const r = spawnSync(process.execPath, args, { stdio: 'inherit' })
     return r.status ?? 1
   }

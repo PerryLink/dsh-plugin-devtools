@@ -68,12 +68,17 @@ export function testDrive(dir, options = {}) {
       if (dump.exit !== 0) status = 'fail'
     }
     if (options.boot) {
-      boot = run('dsh', ['--profile', profile, '--help'], env, 20_000)
-      commands.push(boot)
-      if (boot.timedOut || boot.exit !== 0) {
-        boot = { ...boot, status: 'blocked' }
-        if (status === 'pass') status = 'pass-with-warnings'
-      } else boot = { ...boot, status: 'pass' }
+      const bootRun = spawnSync('dsh', ['--profile', profile, '--no-open', '--port', '0'], { encoding: 'utf8', timeout: 30_000, env })
+      const url = (bootRun.stdout || '').match(/https?:\/\/127\.0\.0\.1:\d+[^\s]*/)?.[0] ?? null
+      boot = {
+        command: 'dsh --profile ' + profile + ' --no-open --port 0',
+        exit: bootRun.status,
+        timedOut: bootRun.error?.code === 'ETIMEDOUT',
+        url,
+        status: url ? 'pass' : 'blocked',
+      }
+      commands.push({ ...boot, stdoutHash: hash(bootRun.stdout), stderrHash: hash(bootRun.stderr) })
+      if (!url && status === 'pass') status = 'pass-with-warnings'
     }
     const remove = run('dsh', ['plugin', '--profile', profile, 'remove', pkg.name], env, 120_000)
     commands.push(remove)

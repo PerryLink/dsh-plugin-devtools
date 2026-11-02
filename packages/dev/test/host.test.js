@@ -18,7 +18,7 @@ function fakeBin() {
   const bin = fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-dev-bin-'))
   for (const name of ['dsh', 'pnpm']) {
     const file = path.join(bin, name)
-    fs.writeFileSync(file, `#!/bin/sh\necho "$@" >> "$DSH_DEV_TEST_LOG"\nexit 0\n`)
+    fs.writeFileSync(file, `#!/bin/sh\necho "$@" >> "$DSH_DEV_TEST_LOG"\ncase "$*" in *--port*) echo "http://127.0.0.1:1234/?token=test" ;; esac\nexit 0\n`)
     fs.chmodSync(file, 0o755)
   }
   return bin

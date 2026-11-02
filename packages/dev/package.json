@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-dev",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "One command for the DeepSeek Harness plugin developer workflow.",
   "license": "Apache-2.0",
   "type": "module",
@@ -14,7 +14,8 @@
     "bin",
     "src",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=20"
