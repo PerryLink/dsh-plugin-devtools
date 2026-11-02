@@ -24,7 +24,7 @@ function run(command, args, env, timeout = 120_000) {
   }
 }
 
-export function testDrive(dir) {
+export function testDrive(dir, options = {}) {
   const target = path.resolve(dir || '.')
   const pkgFile = path.join(target, 'package.json')
   if (!fs.existsSync(pkgFile)) {
@@ -57,6 +57,7 @@ export function testDrive(dir) {
   const env = { ...process.env, DSH_HOME: home }
   const commands = []
   let status = 'pass'
+  let boot = null
   try {
     const add = run('dsh', ['plugin', '--profile', profile, 'add', target], env, 180_000)
     commands.push(add)
@@ -65,6 +66,14 @@ export function testDrive(dir) {
       const dump = run('dsh', ['--profile', profile, '--dump-config'], env, 60_000)
       commands.push(dump)
       if (dump.exit !== 0) status = 'fail'
+    }
+    if (options.boot) {
+      boot = run('dsh', ['--profile', profile, '--help'], env, 20_000)
+      commands.push(boot)
+      if (boot.timedOut || boot.exit !== 0) {
+        boot = { ...boot, status: 'blocked' }
+        if (status === 'pass') status = 'pass-with-warnings'
+      } else boot = { ...boot, status: 'pass' }
     }
     const remove = run('dsh', ['plugin', '--profile', profile, 'remove', pkg.name], env, 120_000)
     commands.push(remove)
@@ -82,6 +91,7 @@ export function testDrive(dir) {
     realProfile: real,
     tempHome: home,
     commands,
+    boot,
     notClaimed: [
       'install + dump-config + remove, not a full UI/boot test',
       'not C3 certification',

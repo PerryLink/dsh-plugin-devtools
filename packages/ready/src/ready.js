@@ -125,6 +125,9 @@ export function check(dir) {
   if (pkg.dsh?.manifestVersion === 1) add(checks, 'R12', 'pass', 'dsh.manifestVersion: 1')
   else add(checks, 'R12', 'warn', 'dsh.manifestVersion is missing or not 1')
 
+  if (pkg.engines?.dsh && !pkg.peerDependencies?.['@deepseek-ai/dsh']) add(checks, 'R18', 'warn', 'engines.dsh is not read by the host; add peerDependencies["@deepseek-ai/dsh"] with the same range')
+  else add(checks, 'R18', 'pass', 'host version carrier (peerDependencies) is present or no engines.dsh is declared')
+
   if (pkg.repository) add(checks, 'R13', 'pass', 'repository is present')
   else add(checks, 'R13', 'warn', 'repository is missing')
 

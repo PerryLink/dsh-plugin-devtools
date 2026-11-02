@@ -26,6 +26,12 @@ npx dsh-plugin-dev test .
 
 `dsh-dev` is the advertised front door; the other three work standalone.
 
+## Mirrors
+
+- GitHub is canonical: issues, pull requests, releases.
+- Gitee and GitCode are read-only code mirrors; no issues or pull requests there.
+- `node scripts/sync-mirrors.mjs` syncs code only; the manual `sync-mirrors` workflow uses `GITEE_TOKEN` / `GITCODE_TOKEN` secrets. It never touches issues/PRs.
+
 ## Position under ENTRY / FLOW / BOOST
 
 - `start`: creates the ENTRY C1/C2/C6/C7 shape, an installable FLOW J1 skeleton,

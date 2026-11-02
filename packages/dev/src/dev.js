@@ -41,11 +41,13 @@ export async function main(argv) {
   if (command === 'test') {
     let dir = null
     let json = false
+    let boot = false
     for (let i = 0; i < rest.length; i++) {
       if (rest[i] === '--json') json = true
+      else if (rest[i] === '--boot') boot = true
       else if (!dir && !rest[i].startsWith('-')) dir = rest[i]
     }
-    const result = testDrive(dir || '.')
+    const result = testDrive(dir || '.', { boot })
     if (json) process.stdout.write(JSON.stringify(result, null, 2) + '\n')
     else {
       console.log(`dsh-dev test: ${result.status}`)
