@@ -58,8 +58,8 @@ function compat(dir, meta, hostEvidence) {
   try { pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8')) } catch {}
   const peer = pkg?.peerDependencies?.['@deepseek-ai/dsh']
   const engine = pkg?.engines?.dsh
-  if (typeof peer === 'string' && peer.trim()) add('C4', 'pass', `peerDependencies["@deepseek-ai/dsh"] = ${peer}`)
-  else if (typeof engine === 'string' && engine.trim()) add('C4', 'warn', `engines.dsh = ${engine} only; host reads peerDependencies`)
+  if (typeof engine === 'string' && engine.trim()) add('C4', 'pass', `engines.dsh = ${engine} (install-time carrier${peer ? '; peer ignored' : ''})`)
+  else if (typeof peer === 'string' && peer.trim()) add('C4', 'pass', `peerDependencies["@deepseek-ai/dsh"] = ${peer} (fallback carrier)`)
   else add('C4', 'warn', 'no engines.dsh or @deepseek-ai/dsh peer range')
   const r9 = ready.static.checks.find(c => c.id === 'R9')
   if (r9?.detail === 'no dsh.client declared') add('C5', 'not-applicable', 'no dsh.client; client export not required')
