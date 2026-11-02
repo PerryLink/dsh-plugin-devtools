@@ -86,7 +86,7 @@ function compat(dir, meta, hostEvidence) {
   }
 }
 
-export function submit({ dir, standards, meta: metaFile, hostEvidence: hostFile, json }) {
+export function submit({ dir, standards, meta: metaFile, hostEvidence: hostFile, hostVersion, json }) {
   const target = path.resolve(dir || '.')
   const script = findStandards(standards) ?? VENDOR
   if (fs.existsSync(script)) {
@@ -95,6 +95,7 @@ export function submit({ dir, standards, meta: metaFile, hostEvidence: hostFile,
     const host = hostFile ? path.resolve(hostFile) : null
     if (meta) args.push('--meta', meta)
     if (host) args.push('--host-evidence', host)
+    if (hostVersion) args.push('--host-version', hostVersion)
     if (json) args.push('--format', 'json')
     const r = spawnSync(process.execPath, args, { stdio: 'inherit' })
     return r.status ?? 1

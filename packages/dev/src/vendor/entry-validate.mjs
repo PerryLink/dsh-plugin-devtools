@@ -2,7 +2,7 @@
 /**
  * entry-validate.mjs — static C1-C8 checklist for DSH plugins.
  *
- * Vendored from PerryLink/dsh-plugin-spec@70d9007 (Apache-2.0) for offline use.
+ * Vendored from PerryLink/dsh-plugin-spec@65a5264 (Apache-2.0) for offline use.
  * It is a pre-submit helper, not a gate, certification, ranking, or security audit. C1/C3/C7 need --meta and are reported not-run without it. C5 is
  * not-applicable when the plugin ships no client. C6 checks metadata and the
  * entry file; code reality still needs a human sample.
@@ -10,7 +10,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { validRange } from './semver.mjs'
+import { parseVersion, satisfies, validRange } from './semver.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const CHECKLIST_PATH = path.join(HERE, 'checklist.json')
@@ -25,6 +25,7 @@ Usage:
 Options:
   --meta <file>     JSON: repo, topics, archived, commit, pushedAt, installCommand, claimLevel
   --host-evidence <file>  JSON: { status: pass|fail|blocked|not-run, command, host, evidence, generatedAt }
+  --host-version <ver>    optional exact host version; C4 mismatch is a warning, not a fail
   --format text|json  default text
   --out <file>      write the JSON result
   --help            show this help
@@ -33,7 +34,7 @@ Exit codes: 0 pass/pass-with-warnings; 2 fail; 3 incomplete/not-run.`)
 }
 
 function parseArgs(argv) {
-  const options = { dir: null, meta: null, hostEvidence: null, format: 'text', out: null }
+  const options = { dir: null, meta: null, hostEvidence: null, hostVersion: null, format: 'text', out: null }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
     const next = () => {
@@ -44,6 +45,7 @@ function parseArgs(argv) {
     }
     if (arg === '--meta') options.meta = next()
     else if (arg === '--host-evidence') options.hostEvidence = next()
+    else if (arg === '--host-version') options.hostVersion = next()
     else if (arg === '--json') options.format = 'json'
     else if (arg === '--format') options.format = next()
     else if (arg === '--out') options.out = next()
@@ -54,6 +56,7 @@ function parseArgs(argv) {
   }
   if (!options.dir) throw new Error('a plugin directory is required')
   if (!['text', 'json'].includes(options.format)) throw new Error('--format must be text or json')
+  if (options.hostVersion && !parseVersion(options.hostVersion)) throw new Error('--host-version must be an exact semver, e.g. 0.2.1-rc.5')
   options.dir = path.resolve(options.dir)
   if (!fs.existsSync(path.join(options.dir, 'package.json'))) throw new Error(`not a package directory: ${options.dir}`)
   return options
@@ -83,7 +86,7 @@ function check(id, status, detail, evidence = null) {
   return { id, status, detail, evidence }
 }
 
-function run(dir, meta) {
+function run(dir, meta, hostVersion = null) {
   const pkg = readJson(path.join(dir, 'package.json'), 'package.json')
   const dsh = pkg.dsh && typeof pkg.dsh === 'object' ? pkg.dsh : {}
   const checks = []
@@ -149,7 +152,13 @@ function run(dir, meta) {
     checks.push(check('C4', 'fail', `${source} is not a valid range: ${range}`))
   } else {
     const ignored = engine && peer && peer !== engine ? ' (engines.dsh wins; peer range is ignored by the host)' : ''
-    checks.push(check('C4', 'pass', `${source} = ${range} (install-time range${ignored})`))
+    const carrier = engine ? 'authoritative' : 'fallback'
+    if (hostVersion && !satisfies(hostVersion, range)) {
+      checks.push(check('C4', 'warn', `${source} = ${range} (${carrier} range; does not match --host-version ${hostVersion}${ignored}); install-time check remains authoritative`))
+    } else {
+      const match = hostVersion ? `; matches --host-version ${hostVersion}` : ''
+      checks.push(check('C4', 'pass', `${source} = ${range} (${carrier} range${match}${ignored})`))
+    }
   }
 
   // C5 — client export
@@ -276,7 +285,7 @@ function main() {
     const host = readJson(path.resolve(options.hostEvidence), '--host-evidence')
     meta = { ...(meta ?? {}), hostInstall: host }
   }
-  const result = run(options.dir, meta)
+  const result = run(options.dir, meta, options.hostVersion ?? null)
   const output = options.format === 'json' ? JSON.stringify(result, null, 2) : render(result)
   if (options.out) {
     fs.mkdirSync(path.dirname(path.resolve(options.out)), { recursive: true })

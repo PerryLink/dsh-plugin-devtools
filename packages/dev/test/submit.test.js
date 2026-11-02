@@ -53,3 +53,13 @@ test('submit with meta but no host evidence passes the ENTRY full checker', () =
   assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-applicable')
   assert.deepEqual(json.checks.filter(c => c.status === 'fail'), [])
 })
+
+test('submit passes --host-version through to the vendored C4 check', () => {
+  const dir = fixture()
+  const meta = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-meta-')), 'meta.json')
+  fs.writeFileSync(meta, JSON.stringify({ repo: 'PerryLink/demo-submit', topics: ['dsh-plugin'], archived: false, commit: 'abc123', pushedAt: '2026-11-02' }))
+  const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--meta', meta, '--host-version', '0.2.1-rc.5', '--json'], { encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.equal(json.checks.find(c => c.id === 'C4').status, 'warn')
+})

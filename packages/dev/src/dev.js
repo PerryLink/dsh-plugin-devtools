@@ -16,7 +16,7 @@ Usage:
   dsh-dev check [<dir>] [--json] [--strict]
   dsh-dev tools [list|doctor|install|update]
   dsh-dev test <dir> [--json] [--boot]
-  dsh-dev submit <dir> [--standards <checkout>] [--meta <file>] [--host-evidence <file>]
+  dsh-dev submit <dir> [--standards <checkout>] [--meta <file>] [--host-evidence <file>] [--host-version <ver>]
   dsh-dev upgrade
 
 This command only dispatches. It does not install a plugin, run a host, or
@@ -62,15 +62,17 @@ export async function main(argv) {
     let standards = null
     let meta = null
     let host = null
+    let hostVersion = null
     let json = false
     for (let i = 0; i < rest.length; i++) {
       if (rest[i] === '--standards') { standards = rest[++i] ?? null; continue }
       if (rest[i] === '--meta') { meta = rest[++i] ?? null; continue }
       if (rest[i] === '--host-evidence') { host = rest[++i] ?? null; continue }
+      if (rest[i] === '--host-version') { hostVersion = rest[++i] ?? null; continue }
       if (rest[i] === '--json') { json = true; continue }
       if (!dir && !rest[i].startsWith('-')) dir = rest[i]
     }
-    return submit({ dir, standards, meta, hostEvidence: host, json })
+    return submit({ dir, standards, meta, hostEvidence: host, hostVersion, json })
   }
   if (command === 'upgrade') {
     console.error('dsh-dev upgrade: install dsh-plugin-upgrade, then run:')

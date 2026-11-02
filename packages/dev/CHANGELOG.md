@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.5 (2026-11-02)
+- Vendor canonical 65a5264 checker; pass through `--host-version`.
+
 ## 0.2.4 (2026-11-02)
 - Vendor the full `entry-validate` checker (dsh-plugin-spec@70d9007) for offline submits.
 - `--boot` now probes `dsh --profile test --no-open --port 0` for a URL; no URL = blocked.
