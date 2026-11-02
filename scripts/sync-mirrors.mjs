@@ -31,11 +31,20 @@ function walk(dir, base = dir, out = []) {
 }
 
 async function api(url, options = {}) {
-  const response = await fetch(url, { ...options, headers: { 'User-Agent': 'dsh-plugin-devtools-sync', ...(options.headers ?? {}) } })
-  const text = await response.text()
-  let json = null
-  try { json = JSON.parse(text) } catch { json = { raw: text } }
-  return { status: response.status, json, text }
+  let last
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const response = await fetch(url, { ...options, headers: { 'User-Agent': 'dsh-plugin-devtools-sync', ...(options.headers ?? {}) } })
+      const text = await response.text()
+      let json = null
+      try { json = JSON.parse(text) } catch { json = { raw: text } }
+      return { status: response.status, json, text }
+    } catch (error) {
+      last = error
+      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, attempt * 2000))
+    }
+  }
+  throw last
 }
 
 async function ensureRepo(platform, name) {
