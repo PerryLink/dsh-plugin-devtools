@@ -29,7 +29,7 @@ test('submit without standards runs the compat subset and is incomplete without 
   const json = JSON.parse(out.stdout)
   assert.equal(json.mode, 'compat')
   assert.equal(json.status, 'incomplete')
-  assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-run')
+  assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-applicable')
 })
 
 test('submit delegates to a discovered entry-validate script', () => {
@@ -40,4 +40,16 @@ test('submit delegates to a discovered entry-validate script', () => {
   fs.writeFileSync(path.join(script, 'entry-validate.mjs'), 'process.exit(0)\n')
   const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--standards', standards], { encoding: 'utf8' })
   assert.equal(out.status, 0, out.stderr)
+})
+
+test('submit with meta but no host evidence passes the ENTRY compat subset', () => {
+  const dir = fixture()
+  const meta = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-meta-')), 'meta.json')
+  fs.writeFileSync(meta, JSON.stringify({ repo: 'PerryLink/demo-submit', topics: ['dsh-plugin'], archived: false, commit: 'abc123', pushedAt: '2026-11-02' }))
+  const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--meta', meta, '--json'], { encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.equal(json.status, 'pass-with-warnings')
+  assert.equal(json.checks.find(c => c.id === 'C3').status, 'not-applicable')
+  assert.deepEqual(json.checks.filter(c => c.status === 'fail'), [])
 })

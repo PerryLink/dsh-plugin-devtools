@@ -10,7 +10,7 @@ dsh-start new my-plugin --client
 
 ## What you get
 
-- `package.json` with `dsh.manifestVersion`, `dsh.bundle.patch`, `engines.dsh`;
+- `package.json` with `dsh.manifestVersion`, `dsh.bundle.patch`, `engines.dsh`, and the host-enforced `peerDependencies["@deepseek-ai/dsh"]`;
 - `cordis.patch.yml` that inserts `./index.js`;
 - `index.js` with a `ctx.effect` dispose shape;
 - optional `client.js` + `./client` export with `--client`;

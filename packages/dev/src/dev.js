@@ -15,7 +15,7 @@ Usage:
   dsh-dev new <name> [--dir <dir>] [--client]
   dsh-dev check [<dir>] [--json] [--strict]
   dsh-dev tools [list|doctor|install|update]
-  dsh-dev test <dir>
+  dsh-dev test <dir> [--json] [--boot]
   dsh-dev submit <dir> [--standards <checkout>] [--meta <file>] [--host-evidence <file>]
   dsh-dev upgrade
 

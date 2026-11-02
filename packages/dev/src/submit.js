@@ -19,10 +19,10 @@ export function findStandards(explicit) {
     if (fs.existsSync(nested)) return nested
   }
   const candidates = [
-    'dsh-standard', 'dsh-standards',
-    '../dsh-standard', '../dsh-standards',
-    '../../dsh-standard', '../../dsh-standards',
-    '../../../dsh-standard', '../../../dsh-standards',
+    'dsh-plugin-spec', 'dsh-standard', 'dsh-standards',
+    '../dsh-plugin-spec', '../dsh-standard', '../dsh-standards',
+    '../../dsh-plugin-spec', '../../dsh-standard', '../../dsh-standards',
+    '../../../dsh-plugin-spec', '../../../dsh-standard', '../../../dsh-standards',
   ]
   for (const candidate of candidates) {
     const nested = path.join(process.cwd(), candidate, '40-checker', 'scripts', 'entry-validate.mjs')
@@ -52,11 +52,18 @@ function compat(dir, meta, hostEvidence) {
   if (hostEvidence) {
     const s = ['pass', 'fail', 'blocked', 'not-run'].includes(hostEvidence.status) ? hostEvidence.status : 'blocked'
     add('C3', s, `host evidence: ${hostEvidence.status}`)
-  } else add('C3', 'not-run', 'no --host-evidence')
-  const r10 = ready.static.checks.find(c => c.id === 'R10')
-  add('C4', r10?.status === 'pass' ? 'pass' : 'warn', r10?.detail ?? 'engines.dsh missing')
+  } else add('C3', 'not-applicable', 'C3 is FLOW-only; run dsh-dev test/J1 or pass --host-evidence')
+  const pkgFile = path.join(path.resolve(dir || '.'), 'package.json')
+  let pkg = null
+  try { pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8')) } catch {}
+  const peer = pkg?.peerDependencies?.['@deepseek-ai/dsh']
+  const engine = pkg?.engines?.dsh
+  if (typeof peer === 'string' && peer.trim()) add('C4', 'pass', `peerDependencies["@deepseek-ai/dsh"] = ${peer}`)
+  else if (typeof engine === 'string' && engine.trim()) add('C4', 'warn', `engines.dsh = ${engine} only; host reads peerDependencies`)
+  else add('C4', 'warn', 'no engines.dsh or @deepseek-ai/dsh peer range')
   const r9 = ready.static.checks.find(c => c.id === 'R9')
-  add('C5', r9?.status === 'pass' ? 'pass' : r9?.status === 'warn' ? 'warn' : 'fail', r9?.detail ?? 'client export')
+  if (r9?.detail === 'no dsh.client declared') add('C5', 'not-applicable', 'no dsh.client; client export not required')
+  else add('C5', r9?.status === 'pass' ? 'pass' : r9?.status === 'warn' ? 'warn' : 'fail', r9?.detail ?? 'client export')
   const c6 = [ready.static.checks.find(c => c.id === 'R4'), ready.static.checks.find(c => c.id === 'R5'), ready.static.checks.find(c => c.id === 'R6')]
   add('C6', c6.some(c => c?.status === 'fail') ? 'fail' : c6.some(c => c?.status === 'warn') ? 'warn' : 'pass', 'entry/license/description (compat)')
   const r3 = ready.static.checks.find(c => c.id === 'R3')

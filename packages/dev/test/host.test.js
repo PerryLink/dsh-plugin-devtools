@@ -28,14 +28,15 @@ test('test drives install, dump-config, and remove in a temp DSH_HOME', () => {
   const dir = fixture()
   const bin = fakeBin()
   const log = path.join(bin, 'calls.log')
-  const out = spawnSync(process.execPath, [BIN, 'test', dir, '--json'], {
+  const out = spawnSync(process.execPath, [BIN, 'test', dir, '--boot', '--json'], {
     encoding: 'utf8',
     env: { ...process.env, PATH: `${bin}:${NODE_DIR}:/usr/bin:/bin`, DSH_DEV_TEST_LOG: log },
   })
   assert.equal(out.status, 0, out.stderr)
   const json = JSON.parse(out.stdout)
   assert.equal(json.status, 'pass')
-  assert.equal(json.commands.length, 3)
+  assert.equal(json.commands.length, 4)
+  assert.equal(json.boot.status, 'pass')
   assert.match(fs.readFileSync(log, 'utf8'), /plugin --profile test add/)
   assert.match(fs.readFileSync(log, 'utf8'), /--dump-config/)
   assert.match(fs.readFileSync(log, 'utf8'), /plugin --profile test remove/)

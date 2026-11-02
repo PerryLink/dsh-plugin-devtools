@@ -1,6 +1,12 @@
 name: sync-mirrors
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'packages/**'
+      - 'scripts/sync-mirrors.mjs'
+  schedule:
+    - cron: '0 2 * * *'
 jobs:
   sync:
     runs-on: ubuntu-latest

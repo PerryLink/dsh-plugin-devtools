@@ -63,6 +63,14 @@ test('fails a client declaration without ./client export', () => {
   assert.ok(json.static.checks.some(c => c.id === 'R9' && c.status === 'fail'))
 })
 
+test('engines.dsh without a peer range is an R18 warning', () => {
+  const dir = fixture()
+  const out = spawnSync(process.execPath, [BIN, dir, '--json'], { encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.equal(json.static.checks.find(c => c.id === 'R18').status, 'warn')
+})
+
 test('--strict turns a warning into exit 2', () => {
   const dir = fixture()
   fs.rmSync(path.join(dir, 'README.md'))

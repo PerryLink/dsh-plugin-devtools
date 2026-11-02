@@ -21,8 +21,9 @@ and are also subcommands of `dsh-dev`. No package duplicates another package's l
 | `dsh-plugin-tools` | version/compatibility support | tool availability | benchmark tool discovery |
 | `dsh-plugin-dev` | dispatches start/ready | dispatches test/upgrade | dispatches future bench |
 
-C3 host install is deliberately out of `dsh-plugin-ready`; use `dsh-test-drive`
-and feed its result to `entry-validate --host-evidence`. A static pass is not a
+C3 is FLOW-only in the current spec. `dsh-plugin-ready` does not fake it; use
+`dsh-dev test` / test-drive for J1 and `entry-validate --host-evidence` when you
+need FLOW evidence. A static pass is not a
 host install, an audit, or a certification.
 
 ## Composition

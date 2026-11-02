@@ -15,8 +15,7 @@ forbidden grade/rank fields.
 
 **It does not install the plugin or start a host.** By default `host` is
 `not-run`. `--host` runs `dsh-clinic --only X` if clinic is installed; a
-`blocked` host is not a pass. C3 still requires a real install (use
-`dsh-dev test` / test-drive) and `entry-validate --host-evidence`.
+`blocked` host is not a pass. C3 is FLOW-only; use `dsh-dev test` / test-drive for J1 install evidence and `entry-validate --host-evidence` when you need it.
 A static pass is not an audit or certification.
 
 Exit codes: `0` pass/pass-with-warnings; `2` fail. `--strict` also fails on warnings.
