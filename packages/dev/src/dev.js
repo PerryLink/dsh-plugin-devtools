@@ -75,9 +75,15 @@ export async function main(argv) {
     return submit({ dir, standards, meta, hostEvidence: host, hostVersion, json })
   }
   if (command === 'upgrade') {
-    console.error('dsh-dev upgrade: install dsh-plugin-upgrade, then run:')
-    console.error('  dsh-plugin-upgrade-scan .')
-    return 3
+    const probe = spawnSync(process.platform === 'win32' ? 'where' : 'which', ['dsh-codemod'], { encoding: 'utf8', timeout: 3000 })
+    if (probe.status !== 0) {
+      console.error('dsh-dev upgrade: install dsh-codemod, then retry:')
+      console.error('  npm i -g dsh-codemod')
+      console.error('  npx dsh-codemod .')
+      return 3
+    }
+    const run = spawnSync('dsh-codemod', rest, { stdio: 'inherit' })
+    return run.status ?? 1
   }
   console.error(`unknown command: ${command}`)
   console.error(usage())

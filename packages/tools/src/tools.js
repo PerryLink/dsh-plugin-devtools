@@ -11,7 +11,7 @@ export const KNOWN = [
   { id: 'primer', pkg: 'dsh-primer', bin: null, role: 'learn/plan/scaffold knowledge' },
   { id: 'clinic', pkg: 'dsh-clinic', bin: 'dsh-clinic', role: 'static + host-contract checks' },
   { id: 'test-drive', pkg: 'dsh-test-drive', bin: null, role: 'isolated install/smoke (C3)' },
-  { id: 'upgrade', pkg: 'dsh-plugin-upgrade', bin: 'dsh-plugin-upgrade-scan', role: 'version migration' },
+  { id: 'codemod', pkg: 'dsh-codemod', bin: 'dsh-codemod', role: 'version migration' },
   { id: 'standards', pkg: null, bin: null, role: 'ENTRY/FLOW/BOOST spec and entry-validate' },
 ]
 

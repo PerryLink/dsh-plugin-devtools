@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.1 (2026-11-03)
+- `upgrade` delegates to `dsh-codemod`, not deprecated `dsh-plugin-upgrade`.
+
 ## 0.3.0 (2026-11-03)
 - Add `dsh-evidence/1` output to `dsh-dev test`; submit accepts it.
 
