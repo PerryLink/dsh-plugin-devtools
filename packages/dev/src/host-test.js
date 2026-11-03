@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { makeEvidence } from './evidence.js'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -86,6 +87,17 @@ export function testDrive(dir, options = {}) {
   } finally {
     fs.rmSync(temp, { recursive: true, force: true })
   }
+  const evidence = makeEvidence({
+    kind: 'host-install',
+    subject: { repo: target, version: pkg.version ?? null, commit: null },
+    host: 'dsh (version not captured by this probe)',
+    command: commands.map(c => c.command).join(' ; '),
+    status: status === 'pass-with-warnings' ? 'pass' : status,
+    startedAt: new Date().toISOString(),
+    finishedAt: new Date().toISOString(),
+    artifacts: commands,
+    limitations: ['install + dump-config + remove; not a full UI/boot test', 'not C3 certification'],
+  })
   return {
     schema: 'dsh-dev-test/1',
     tool: 'dsh-dev',
@@ -97,6 +109,7 @@ export function testDrive(dir, options = {}) {
     tempHome: home,
     commands,
     boot,
+    evidence,
     notClaimed: [
       'install + dump-config + remove, not a full UI/boot test',
       'not C3 certification',

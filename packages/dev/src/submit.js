@@ -1,10 +1,21 @@
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { EVIDENCE_SCHEMA, hostEvidenceFromEvidence } from './evidence.js'
 import { check as readyCheck } from 'dsh-plugin-ready'
 
 const VENDOR = fileURLToPath(new URL('./vendor/entry-validate.mjs', import.meta.url))
+
+function normalizeHostFile(file) {
+  if (!file) return null
+  const raw = readJson(file)
+  if (raw?.schema !== EVIDENCE_SCHEMA) return file
+  const temp = path.join(os.tmpdir(), `dsh-host-evidence-${process.pid}.json`)
+  fs.writeFileSync(temp, JSON.stringify(hostEvidenceFromEvidence(raw), null, 2))
+  return temp
+}
 
 function readJson(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')) } catch { return null }
@@ -92,7 +103,7 @@ export function submit({ dir, standards, meta: metaFile, hostEvidence: hostFile,
   if (fs.existsSync(script)) {
     const args = [script, target]
     const meta = metaFile ? path.resolve(metaFile) : null
-    const host = hostFile ? path.resolve(hostFile) : null
+    const host = hostFile ? normalizeHostFile(path.resolve(hostFile)) : null
     if (meta) args.push('--meta', meta)
     if (host) args.push('--host-evidence', host)
     if (hostVersion) args.push('--host-version', hostVersion)

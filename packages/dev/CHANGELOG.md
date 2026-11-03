@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0 (2026-11-03)
+- Add `dsh-evidence/1` output to `dsh-dev test`; submit accepts it.
+
 ## 0.2.5 (2026-11-02)
 - Vendor canonical 65a5264 checker; pass through `--host-version`.
 

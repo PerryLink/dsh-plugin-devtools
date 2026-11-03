@@ -63,3 +63,27 @@ test('submit passes --host-version through to the vendored C4 check', () => {
   const json = JSON.parse(out.stdout)
   assert.equal(json.checks.find(c => c.id === 'C4').status, 'warn')
 })
+
+test('submit accepts dsh-evidence/1 host evidence', () => {
+  const dir = fixture()
+  const meta = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-meta-')), 'meta.json')
+  fs.writeFileSync(meta, JSON.stringify({ repo: 'PerryLink/demo-submit', topics: ['dsh-plugin'], archived: false, commit: 'abc123', pushedAt: '2026-11-02' }))
+  const evidence = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-evidence-')), 'evidence.json')
+  fs.writeFileSync(evidence, JSON.stringify({
+    schema: 'dsh-evidence/1',
+    kind: 'host-install',
+    subject: { repo: dir, version: '0.1.0', commit: null },
+    host: 'dsh 0.2.1-rc.5',
+    command: 'dsh plugin add',
+    status: 'pass',
+    startedAt: '2026-11-03T00:00:00Z',
+    finishedAt: '2026-11-03T00:01:00Z',
+    artifacts: [],
+    limitations: [],
+    notClaimed: [],
+  }))
+  const out = spawnSync(process.execPath, [BIN, 'submit', dir, '--meta', meta, '--host-evidence', evidence, '--json'], { encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+  const json = JSON.parse(out.stdout)
+  assert.equal(json.checks.find(c => c.id === 'C3').status, 'pass')
+})
